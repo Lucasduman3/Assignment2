@@ -25,7 +25,6 @@ def customer_list(request):
 def customer_edit(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == "POST":
-        # update
         form = CustomerForm(request.POST, instance=customer)
         if form.is_valid():
             customer = form.save(commit=False)
@@ -35,7 +34,6 @@ def customer_edit(request, pk):
             return render(request, 'crm/customer_list.html',
                           {'customers': customer})
     else:
-        # edit
         form = CustomerForm(instance=customer)
     return render(request, 'crm/customer_edit.html', {'form': form})
 
@@ -66,7 +64,6 @@ def service_new(request):
                           {'services': services})
     else:
         form = ServiceForm()
-        # print("Else")
     return render(request, 'crm/service_new.html', {'form': form})
 
 
@@ -77,13 +74,11 @@ def service_edit(request, pk):
         form = ServiceForm(request.POST, instance=service)
         if form.is_valid():
             service = form.save()
-            # service.customer = service.id
             service.updated_date = timezone.now()
             service.save()
             services = Service.objects.filter(created_date__lte=timezone.now())
             return render(request, 'crm/service_list.html', {'services': services})
     else:
-        # print("else")
         form = ServiceForm(instance=service)
     return render(request, 'crm/service_edit.html', {'form': form})
 
@@ -94,8 +89,6 @@ def service_delete(request, pk):
     service.delete()
     return redirect('crm:service_list')
 
-
-##############################################################################################################
 
 @login_required
 def product_list(request):
@@ -116,7 +109,6 @@ def product_new(request):
                           {'products': product})
     else:
         form = ProductForm()
-        # print("Else")
     return render(request, 'crm/product_new.html', {'form': form})
 
 
@@ -127,13 +119,11 @@ def product_edit(request, pk):
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             product = form.save()
-            # service.customer = service.id
             product.updated_date = timezone.now()
             product.save()
             product = Product.objects.filter(created_date__lte=timezone.now())
             return render(request, 'crm/product_list.html', {'products': product})
     else:
-        # print("else")
         form = ProductForm(instance=product)
     return render(request, 'crm/product_edit.html', {'form': form})
 
@@ -153,16 +143,12 @@ def summary(request, pk):
     products = Product.objects.filter(cust_name=pk)
     sum_service_charge = Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
     sum_product_charge = Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
-    # total_charge = Product.objects.filter(cust_name=pk).aggregate(Sum('charge', field='charge*quantity'))
-    # total_charge = Product.objects.filter(cust_name=pk).aggregate(total = Sum(F('charge')* F('quantity')))['total']
-    # total_charge = Product.objects.filter('charge*quantity')
 
     return render(request, 'crm/summary.html', {'customers': customers,
                                                 'products': products,
                                                 'services': services,
                                                 'sum_service_charge': sum_service_charge,
                                                 'sum_product_charge': sum_product_charge,
-                                                # 'total_charge': total_charge,
                                                 })
 
 
