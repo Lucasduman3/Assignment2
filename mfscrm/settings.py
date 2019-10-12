@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'mathfilters',
     'django.contrib.humanize',
-    'import_export'
 
 ]
 
