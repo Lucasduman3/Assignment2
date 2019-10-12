@@ -1,10 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.db.models import Sum
 from .models import *
 from .forms import *
-from django.shortcuts import render, get_object_or_404
-from django.shortcuts import redirect
-from django.db.models import Sum
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
 
 now = timezone.now()
 
@@ -125,13 +124,11 @@ def product_edit(request, pk):
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             product = form.save()
-            # product.customer = product.id
             product.updated_date = timezone.now()
             product.save()
             products = Product.objects.filter(created_date__lte=timezone.now())
             return render(request, 'crm/product_list.html', {'products': products})
     else:
-        # print("else")
         form = ProductForm(instance=product)
     return render(request, 'crm/product_edit.html', {'form': form})
 
