@@ -4,7 +4,7 @@ from .models import *
 from .forms import *
 from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
-from django.db.models import Sum, F
+from django.db.models import Sum
 
 now = timezone.now()
 
@@ -25,6 +25,7 @@ def customer_list(request):
 def customer_edit(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == "POST":
+        # update
         form = CustomerForm(request.POST, instance=customer)
         if form.is_valid():
             customer = form.save(commit=False)
@@ -34,6 +35,7 @@ def customer_edit(request, pk):
             return render(request, 'crm/customer_list.html',
                           {'customers': customer})
     else:
+        # edit
         form = CustomerForm(instance=customer)
     return render(request, 'crm/customer_edit.html', {'form': form})
 
@@ -64,6 +66,7 @@ def service_new(request):
                           {'services': services})
     else:
         form = ServiceForm()
+        # print("Else")
     return render(request, 'crm/service_new.html', {'form': form})
 
 
@@ -74,11 +77,13 @@ def service_edit(request, pk):
         form = ServiceForm(request.POST, instance=service)
         if form.is_valid():
             service = form.save()
+            # service.customer = service.id
             service.updated_date = timezone.now()
             service.save()
             services = Service.objects.filter(created_date__lte=timezone.now())
             return render(request, 'crm/service_list.html', {'services': services})
     else:
+        # print("else")
         form = ServiceForm(instance=service)
     return render(request, 'crm/service_edit.html', {'form': form})
 
@@ -92,8 +97,8 @@ def service_delete(request, pk):
 
 @login_required
 def product_list(request):
-    product = Product.objects.filter(created_date__lte=timezone.now())
-    return render(request, 'crm/product_list.html', {'products': product})
+    products = Product.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'crm/product_list.html', {'products': products})
 
 
 @login_required
@@ -104,11 +109,12 @@ def product_new(request):
             product = form.save(commit=False)
             product.created_date = timezone.now()
             product.save()
-            product = Product.objects.filter(created_date__lte=timezone.now())
+            products = Product.objects.filter(created_date__lte=timezone.now())
             return render(request, 'crm/product_list.html',
-                          {'products': product})
+                          {'products': products})
     else:
         form = ProductForm()
+        # print("Else")
     return render(request, 'crm/product_new.html', {'form': form})
 
 
@@ -119,11 +125,13 @@ def product_edit(request, pk):
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             product = form.save()
+            # product.customer = product.id
             product.updated_date = timezone.now()
             product.save()
-            product = Product.objects.filter(created_date__lte=timezone.now())
-            return render(request, 'crm/product_list.html', {'products': product})
+            products = Product.objects.filter(created_date__lte=timezone.now())
+            return render(request, 'crm/product_list.html', {'products': products})
     else:
+        # print("else")
         form = ProductForm(instance=product)
     return render(request, 'crm/product_edit.html', {'form': form})
 
@@ -143,16 +151,8 @@ def summary(request, pk):
     products = Product.objects.filter(cust_name=pk)
     sum_service_charge = Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
     sum_product_charge = Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
-
     return render(request, 'crm/summary.html', {'customers': customers,
                                                 'products': products,
                                                 'services': services,
                                                 'sum_service_charge': sum_service_charge,
-                                                'sum_product_charge': sum_product_charge,
-                                                })
-
-
-def total(products):
-    total = products.quantity * products.charge
-
-    return total
+                                                'sum_product_charge': sum_product_charge, })
